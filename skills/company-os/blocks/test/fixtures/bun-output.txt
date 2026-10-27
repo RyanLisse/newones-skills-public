@@ -1,0 +1,8 @@
+bun test v1.2.3
+
+ 2 pass
+ 1 fail
+ 1 skip
+
+(fail) auth > rejects expired token [2.1ms]
+(pass) auth > accepts a valid token [1.0ms]

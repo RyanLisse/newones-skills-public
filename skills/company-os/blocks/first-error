@@ -1,0 +1,42 @@
+#!/usr/bin/env bun
+
+const readInput = async (file: string | undefined): Promise<string> =>
+  file ? await Bun.file(file).text() : await new Response(Bun.stdin.stream()).text();
+
+const parseArguments = (): { context: number; file?: string } => {
+  const args = Bun.argv.slice(2);
+  let context = 8;
+  let file: string | undefined;
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+    if (argument === "--context" || argument === "--lines" || argument === "-n") {
+      const value = Number(args[index + 1]);
+      if (Number.isInteger(value) && value >= 0) {
+        context = value;
+      }
+      index += 1;
+    } else if (argument.startsWith("--context=") || argument.startsWith("--lines=")) {
+      const value = Number(argument.split("=", 2)[1]);
+      if (Number.isInteger(value) && value >= 0) {
+        context = value;
+      }
+    } else if (!argument.startsWith("-")) {
+      file = argument;
+    }
+  }
+  return { context, file };
+};
+
+const looksLikeFirstError = (line: string): boolean =>
+  /(?:\w*Error:|error:|\bpanic\b|\bTraceback\b)/iu.test(line) ||
+  /\bFAIL\b/u.test(line) ||
+  /^\s*at\s+\S+/u.test(line);
+
+const { context, file } = parseArguments();
+const lines = (await readInput(file)).split(/\r?\n/u);
+const start = lines.findIndex(looksLikeFirstError);
+
+if (start >= 0) {
+  const end = Math.min(lines.length, start + context + 1);
+  process.stdout.write(`${lines.slice(start, end).join("\n")}\n`);
+}

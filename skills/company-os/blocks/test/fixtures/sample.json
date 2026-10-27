@@ -1,0 +1,13 @@
+{
+  "name": "this is a deliberately long value that must not be printed",
+  "enabled": true,
+  "count": 3,
+  "items": [
+    {
+      "id": "item-1",
+      "tags": ["alpha", "beta"],
+      "payload": "another long value that should remain private"
+    }
+  ],
+  "empty": []
+}

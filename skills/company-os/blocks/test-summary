@@ -1,0 +1,294 @@
+#!/usr/bin/env bun
+
+type Totals = {
+  pass: number;
+  fail: number;
+  skip: number;
+};
+
+type UnhandledError = {
+  file?: string;
+  errorType?: string;
+};
+
+type ParsedTotals = {
+  totals: Totals;
+  hasParseableTotals: boolean;
+  hasTotals: boolean;
+};
+
+const readInput = async (file: string | undefined): Promise<string> =>
+  file ? await Bun.file(file).text() : await new Response(Bun.stdin.stream()).text();
+
+const emptyTotals = (): Totals => ({ pass: 0, fail: 0, skip: 0 });
+
+const addCount = (totals: Totals, label: string, count: number): void => {
+  const normalized = label.toLowerCase();
+  if (normalized.startsWith("pass")) {
+    totals.pass += count;
+  } else if (normalized.startsWith("fail") || normalized === "interrupted") {
+    totals.fail += count;
+  } else if (
+    normalized.startsWith("skip") ||
+    normalized === "todo" ||
+    normalized === "pending" ||
+    normalized === "did not run"
+  ) {
+    totals.skip += count;
+  }
+};
+
+const countsOnLine = (line: string): Totals => {
+  const totals = emptyTotals();
+  const countPattern =
+    /(\d+)\s+(passed?|failed?|skipped?|pass|fail|skip|todo|pending|interrupted|did not run)\b/giu;
+  for (const match of line.matchAll(countPattern)) {
+    addCount(totals, match[2], Number(match[1]));
+  }
+  return totals;
+};
+
+const hasCountOnLine = (line: string): boolean =>
+  /\d+\s+(?:passed?|failed?|skipped?|pass|fail|skip|todo|pending|interrupted|did not run)\b/iu.test(
+    line
+  );
+
+const addTotals = (target: Totals, source: Totals): void => {
+  target.pass += source.pass;
+  target.fail += source.fail;
+  target.skip += source.skip;
+};
+
+const hasTotals = (totals: Totals): boolean =>
+  totals.pass > 0 || totals.fail > 0 || totals.skip > 0;
+
+const parseTotals = (lines: readonly string[]): ParsedTotals => {
+  const vitestLines = lines.filter(
+    (line) => /^\s*tests?\s+(?!files?\b)/iu.test(line) && hasCountOnLine(line)
+  );
+  const fileLine = lines
+    .filter((line) => /^\s*test\s+files?\b/iu.test(line) && hasCountOnLine(line))
+    .at(-1);
+  const fileFailures = fileLine === undefined ? 0 : countsOnLine(fileLine).fail;
+  if (vitestLines.length > 0 || fileFailures > 0) {
+    const totals = emptyTotals();
+    const lastLine = vitestLines.at(-1);
+    if (lastLine !== undefined) {
+      addTotals(totals, countsOnLine(lastLine));
+    }
+    if (fileFailures > totals.fail) {
+      totals.fail = fileFailures;
+    }
+    return { totals, hasParseableTotals: true, hasTotals: true };
+  }
+
+  const summaryLines = lines.filter((line) => {
+    const trimmed = line.trim();
+    return (
+      /^\d+\s+(?:passed?|failed?|skipped?|pass|fail|skip|todo|pending|interrupted|did not run)\b/iu.test(
+        trimmed
+      ) ||
+      /^(?:\d+\s+(?:passed?|failed?|skipped?|pass|fail|skip|todo|pending|interrupted|did not run)\b(?:\s*[,|]\s*|$))+$/iu.test(
+        trimmed
+      )
+    );
+  });
+  if (summaryLines.length > 0) {
+    const totals = emptyTotals();
+    for (const line of summaryLines) {
+      addTotals(totals, countsOnLine(line));
+    }
+    return { totals, hasParseableTotals: true, hasTotals: true };
+  }
+
+  const totals = emptyTotals();
+  for (const line of lines) {
+    if (/^\s*(?:[✓✔√]|\(pass\))(?:\b|\s|$)/iu.test(line)) {
+      totals.pass += 1;
+    } else if (/^\s*(?:[✗×✘]|\(fail\))(?:\b|\s|$)/iu.test(line)) {
+      totals.fail += 1;
+    } else if (
+      /^\s*(?:[○◌]|\(skip\))(?:\b|\s|$)/iu.test(line)
+    ) {
+      totals.skip += 1;
+    }
+  }
+  return { totals, hasParseableTotals: false, hasTotals: hasTotals(totals) };
+};
+
+const cleanName = (name: string): string =>
+  name
+    .replace(/\s+(?:\[[^\]]*\]|\([^)]*\))\s*$/u, "")
+    .trim();
+
+const unhandledErrors = (lines: readonly string[]): UnhandledError[] => {
+  const errors: UnhandledError[] = [];
+  let currentFile: string | undefined;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const header = lines[index].match(/^\s*(test\/[^:\s]+):\s*$/u);
+    if (header) {
+      currentFile = header[1];
+      continue;
+    }
+
+    if (!/^\s*# Unhandled error between tests\s*$/iu.test(lines[index])) {
+      continue;
+    }
+
+    let errorType: string | undefined;
+    for (let nextIndex = index + 1; nextIndex < lines.length; nextIndex += 1) {
+      if (
+        /^\s*(?:test\/[^:\s]+):\s*$/u.test(lines[nextIndex]) ||
+        /^\s*# Unhandled error between tests\s*$/iu.test(lines[nextIndex])
+      ) {
+        break;
+      }
+      const error = lines[nextIndex].trim().match(/^([A-Za-z_$][\w$.-]*):/u);
+      if (error) {
+        errorType = error[1];
+        break;
+      }
+    }
+    errors.push({ file: currentFile, errorType });
+  }
+
+  return errors;
+};
+
+const errorCount = (lines: readonly string[]): number | undefined => {
+  for (const line of lines) {
+    const match =
+      line.match(/^\s*(\d+)\s+errors?\s*$/iu) ??
+      line.match(/^\s*errors?\s+(\d+)\s+errors?\b/iu) ??
+      line.match(/^\s*(\d+)\s+errors?\s+(?:was|were)\s+not\s+a\s+part\b/iu);
+    if (match) {
+      return Number(match[1]);
+    }
+  }
+  return undefined;
+};
+
+const failingNames = (lines: readonly string[], errors: readonly UnhandledError[]): string[] => {
+  const names: string[] = [];
+  const add = (name: string): void => {
+    if (name && !names.includes(name)) {
+      names.push(name);
+    }
+  };
+  const addClean = (candidate: string): void => add(cleanName(candidate));
+
+  for (const line of lines) {
+    const bun = line.match(/^\s*\(fail\)\s+(.+)$/iu);
+    const marker = line.match(/^\s*[✗×✘]\s+(.+)$/u);
+    const playwright = line.match(/^\s*\d+\)\s+(.+)$/u);
+    const vitest = line.match(/^\s*FAIL\s+(.+?)\s*>\s*(.+)$/u);
+    const failed = line.match(/^\s*FAILED\s+(.+)$/iu);
+
+    if (bun) {
+      addClean(bun[1]);
+    } else if (marker) {
+      addClean(marker[1]);
+    } else if (playwright && playwright[1].includes("›")) {
+      addClean(playwright[1].split("›").at(-1) ?? playwright[1]);
+    } else if (vitest) {
+      addClean(`${vitest[1]} > ${vitest[2]}`);
+    } else if (failed) {
+      addClean(failed[1]);
+    }
+  }
+  for (const error of errors) {
+    if (error.file && error.errorType) {
+      add(`${error.file}: unhandled error (${error.errorType})`);
+    } else if (error.file) {
+      add(`${error.file}: unhandled error`);
+    } else if (error.errorType) {
+      add(`unhandled error (${error.errorType})`);
+    } else {
+      add("unhandled error");
+    }
+  }
+  return names;
+};
+
+const parseArguments = (): { command?: string[]; file?: string } => {
+  const args = Bun.argv.slice(2);
+  const separatorIndex = args.indexOf("--");
+  if (separatorIndex >= 0) {
+    return { command: args.slice(separatorIndex + 1) };
+  }
+  const fileIndex = args.indexOf("--file");
+  if (fileIndex >= 0) {
+    return { file: args[fileIndex + 1] };
+  }
+  const positionalIndex = args.findIndex((argument) => !argument.startsWith("-"));
+  const positional = positionalIndex >= 0 ? args[positionalIndex] : undefined;
+  if (positional && Bun.which(positional)) {
+    return { command: args.slice(positionalIndex) };
+  }
+  return { file: positional };
+};
+
+const summarize = (text: string): number => {
+  const lines = text
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: strips terminal colour codes
+    .replace(/\u001B(?:\[[0-?]*[ -/]*[@-~]|\][^\u0007\u001B]*(?:\u0007|\u001B\\)?)/gu, "")
+    .split(/\r?\n/u);
+  const parsed = parseTotals(lines);
+  const totals = parsed.totals;
+  const errors = unhandledErrors(lines);
+  const reportedErrorCount = errorCount(lines);
+
+  if (!parsed.hasParseableTotals && !parsed.hasTotals && errors.length === 0) {
+    process.stdout.write("no test summary found\n");
+    return 2;
+  }
+
+  const output = [`pass: ${totals.pass}`, `fail: ${totals.fail}`, `skip: ${totals.skip}`];
+  if (reportedErrorCount !== undefined) {
+    output.push(`errors: ${reportedErrorCount}`);
+  }
+  const names = failingNames(lines, errors);
+  if (names.length > 0) {
+    output.push("failing tests:", ...names.map((name) => `- ${name}`));
+  }
+
+  process.stdout.write(`${output.join("\n")}\n`);
+  return totals.fail > 0 || (reportedErrorCount ?? 0) > 0 || errors.length > 0 ? 1 : 0;
+};
+
+const runCommand = async (command: readonly string[]): Promise<{ code: number; output: string }> => {
+  const child = Bun.spawn(["sh", "-c", 'exec "$@" 2>&1', "test-summary", ...command], {
+    stderr: "pipe",
+    stdout: "pipe",
+  });
+  const [stdout, stderr, code] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ]);
+  return { code, output: `${stdout}${stderr}` };
+};
+
+const { command, file } = parseArguments();
+
+if (command) {
+  if (command.length === 0) {
+    process.stderr.write("test-summary: expected a command after --\n");
+    process.exitCode = 2;
+  } else {
+    const result = await runCommand(command);
+    const summaryCode = summarize(result.output);
+    process.exitCode = result.code !== 0 ? result.code : summaryCode;
+  }
+} else {
+  const input = await readInput(file);
+  if (!file && input.trim().length === 0) {
+    process.stderr.write(
+      "test-summary: stdin is empty; pipe test output with 2>&1 or pass a log file\n"
+    );
+    process.exitCode = 2;
+  } else {
+    process.exitCode = summarize(input);
+  }
+}

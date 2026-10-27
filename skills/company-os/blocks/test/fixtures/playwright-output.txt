@@ -1,0 +1,6 @@
+  1) [chromium] › tests/login.spec.ts:10:3 › logs in with a valid account
+  2) [chromium] › tests/login.spec.ts:18:3 › logs out
+
+  2 failed
+  3 passed
+  1 skipped

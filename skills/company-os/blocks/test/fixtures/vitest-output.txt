@@ -1,0 +1,5 @@
+ FAIL  src/math.test.ts > math > rejects invalid input
+      AssertionError: expected 2 to be 3
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 2 passed | 1 skipped (4)

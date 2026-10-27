@@ -1,0 +1,10 @@
+starting suite
+collecting tests
+ FAIL  src/auth.test.ts > session > rejects an expired token
+  AssertionError: expected status 401
+    at src/auth.test.ts:22:7
+    at runTest (runner.ts:40:3)
+context line one
+context line two
+context line three
+context line four
