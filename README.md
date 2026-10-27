@@ -15,6 +15,7 @@ Agent-skills die The New Ones gebruikt om software te bouwen met coding agents (
 | `skills/job-intelligence` | crabbox | Validatie op een exe.dev-shadowlane met Crabbox |
 | | ji-source-wave | Een golf bronwerk end-to-end: census, lanes, gates, clean-room, bookkeeping |
 | `skills/software-factory` | decision-docket, implement, new-project-defaults, plan, pr, research, show-me, verify-claim-lock | De skills van onze software factory |
+| `skills/shared` | issue-wave | Algemene wave-workflow voor elke repo: census, lanes in worktrees, eigen review, seriële push, clean-room, bookkeeping. `ji-source-wave` is een projectadapter erop |
 
 ## Kanttekeningen
 

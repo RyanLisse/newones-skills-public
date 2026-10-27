@@ -11,6 +11,29 @@ Werkstijl- en workflowskills (`poteto-mode`, `tdd`, `architect`, `interrogate`, 
 /plugin install pstack@pstack-claude
 ```
 
+## fable-advisor (Claude Code-plugin)
+
+Architect-als-orchestrator: Fable 5.1 plant en reviewt, routinewerk gaat naar een GPT-5.6 Luna-lane via Codex, lastige one-offs naar Sol. Levert de `orchestration`-skill en de agents `fable-advisor`, `codex-implementer` en `sol-implementer`. MIT, bron [DannyMac180/fable-advisor](https://github.com/DannyMac180/fable-advisor). In gebruik: versie 5.0.0, commit `4d6cc62164619a279b076439e1af5439892b958a`.
+
+```text
+/plugin marketplace add DannyMac180/fable-advisor
+/plugin install fable-advisor@fable-advisor
+```
+
+## astra-advisor (Codex-plugin)
+
+De Codex-tegenhanger van fable-advisor, met `gpt-6-astra` als adviseur. MIT, bron [DannyMac180/astra-advisor](https://github.com/DannyMac180/astra-advisor). In gebruik: marketplace-revisie `c72d3280551f118eba51a5884e3971a0c0058aa6`. In `~/.codex/config.toml`:
+
+```toml
+[marketplaces.astra-advisor]
+source_type = "git"
+source = "https://github.com/DannyMac180/astra-advisor.git"
+ref = "main"
+
+[plugins."astra-advisor@astra-advisor"]
+enabled = true
+```
+
 ## exe-dev
 
 VM-beheer op exe.dev (VM's, HTTP-proxy, delen, custom domains). Auteur: Benjamin Jesuiter, automatisch gegenereerd uit de exe.dev-docs en volgens de auteur nog niet getest.
