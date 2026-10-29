@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DIAGRAM TITLE</title>
+<style>
+  /* Follows the OS theme; set data-theme="light" or "dark" on <html> to force one. */
+  :root {
+    --bg: #fbfbfa; --fg: #1c1c1a; --muted: #5f5f5a; --rule: #c9c9c2; --node: #ffffff;
+    --client: #2f5bd3; --service: #1f7a4d; --store: #6b46c1; --external: #5f5f5a; --async: #b45309; --trust: #b42318;
+    --sans: ui-sans-serif, system-ui, sans-serif; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  [data-theme="dark"] {
+    --bg: #141413; --fg: #ececea; --muted: #a3a39c; --rule: #4a4a44; --node: #1d1d1b;
+    --client: #8aa8ff; --service: #5cc28c; --store: #b49cff; --external: #a3a39c; --async: #f0a656; --trust: #ff7a6e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141413; --fg: #ececea; --muted: #a3a39c; --rule: #4a4a44; --node: #1d1d1b;
+      --client: #8aa8ff; --service: #5cc28c; --store: #b49cff; --external: #a3a39c; --async: #f0a656; --trust: #ff7a6e;
+    }
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--sans); }
+  main { max-width: 64rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 .3rem; }
+  .lede, figcaption, .sources { color: var(--muted); }
+  figure { margin: 1.5rem 0; }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { font-family: var(--sans); fill: var(--fg); }
+  svg .sub { font-size: 11px; fill: var(--muted); }
+  svg .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+  svg .edge-label { font-size: 11px; fill: var(--muted); font-family: var(--mono); }
+  svg .node { fill: var(--node); stroke-width: 1.5; }
+  svg .boundary { fill: none; stroke: var(--trust); stroke-dasharray: 6 4; }
+  svg .boundary-label { font-size: 11px; fill: var(--trust); font-weight: 600; }
+  .client { stroke: var(--client); } .service { stroke: var(--service); } .store { stroke: var(--store); }
+  .external { stroke: var(--external); } .async { stroke: var(--async); }
+  code { font-family: var(--mono); font-size: .88em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DIAGRAM TITLE</h1>
+  <p class="lede">One or two sentences: what to notice.</p>
+  <figure>
+    <svg viewBox="0 0 760 300" role="img" aria-labelledby="dg-title dg-desc">
+      <title id="dg-title">DIAGRAM TITLE</title>
+      <desc id="dg-desc">The browser calls the Orders API inside the private network; the API reads and writes the orders database.</desc>
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" style="fill: var(--muted)"/>
+        </marker>
+      </defs>
+      <!-- 1. Edges first, so they render behind nodes -->
+      <g aria-hidden="true">
+        <path class="edge" d="M180 120 H320" marker-end="url(#arrow)"/>
+        <text class="edge-label" x="250" y="110" text-anchor="middle">POST /orders</text>
+        <path class="edge" d="M480 120 H580" marker-end="url(#arrow)"/>
+        <text class="edge-label" x="530" y="110" text-anchor="middle">SQL</text>
+      </g>
+      <!-- 2. Boundaries (label says what the boundary means) -->
+      <rect class="boundary" x="300" y="40" width="440" height="160" rx="8"/>
+      <text class="boundary-label" x="312" y="58">Private network</text>
+      <!-- 3. Nodes -->
+      <g><rect class="node client" x="40" y="90" width="140" height="60" rx="6"/>
+        <text x="110" y="116" text-anchor="middle" font-weight="600">Browser</text>
+        <text class="sub" x="110" y="134" text-anchor="middle">React app</text></g>
+      <g><rect class="node service" x="320" y="90" width="160" height="60" rx="6"/>
+        <text x="400" y="116" text-anchor="middle" font-weight="600">Orders API</text>
+        <text class="sub" x="400" y="134" text-anchor="middle">services/orders</text></g>
+      <g><rect class="node store" x="580" y="90" width="140" height="60" rx="6"/>
+        <text x="650" y="116" text-anchor="middle" font-weight="600">orders DB</text>
+        <text class="sub" x="650" y="134" text-anchor="middle">Postgres</text></g>
+      <!-- 4. Legend outside every boundary -->
+      <g transform="translate(40 240)" font-size="11">
+        <rect class="node client" width="14" height="14" rx="3"/><text x="20" y="11">client</text>
+        <rect class="node service" x="80" width="14" height="14" rx="3"/><text x="100" y="11">service</text>
+        <rect class="node store" x="165" width="14" height="14" rx="3"/><text x="185" y="11">data store</text>
+        <rect class="boundary" x="265" width="14" height="14" rx="3"/><text x="285" y="11">trust boundary</text>
+      </g>
+    </svg>
+    <figcaption>Caption: scope of the figure and anything deliberately left out.</figcaption>
+  </figure>
+  <p class="sources">Derived from: <code>docker-compose.yml</code>, <code>services/orders/db.go</code></p>
+</main>
+</body>
+</html>

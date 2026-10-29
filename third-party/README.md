@@ -60,3 +60,25 @@ VM-beheer op exe.dev (VM's, HTTP-proxy, delen, custom domains). Auteur: Benjamin
 | trigger-authoring-chat-agent, trigger-authoring-tasks, trigger-chat-agent-advanced, trigger-cost-savings, trigger-getting-started, trigger-realtime-and-frontend | newones-job-intelligence | Trigger.dev agent skills, `library_version` 4.5.13 (toegevoegd in commit `ae30b353`) |
 
 Deze staan nog als vendored kopie in de productrepo's. Komt er een lockfile voor, dan hoort die hier ook bij.
+
+## compound-engineering (Claude Code-plugin)
+
+Levert onder meer `ce-doc-review`, `ce-plan`, `ce-code-review` en `ce-commit-push-pr`. `requirements-ste100-linear` gebruikt `ce-doc-review` voor de reviewstap. MIT, bron [EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin). Installeer vanuit de bron volgens hun README.
+
+## Gebruikt, maar niet opgenomen (licentie onduidelijk)
+
+Deze skills gebruiken we wel, maar de licentie is niet vast te stellen of ze komen via een site zonder licentietekst. Ze staan daarom niet in deze repo. Installeer ze alleen vanuit de bron als de licentie daar klopt.
+
+| Skill | Bron | Waarom niet |
+|-------|------|-------------|
+| design-review | Superfuture via ui-skills.com | Geen licentietekst gevonden |
+| web-accessibility-audit | addyosmani "accessibility" via ui-skills.com | Geen licentietekst bij de bron die we gebruikten |
+| beautiful-shadows | MengTo via ui-skills.com | Geen licentietekst gevonden |
+
+## Ook bruikbaar, installeer vanuit de bron (MIT)
+
+| Skill | Bron |
+|-------|------|
+| break-ui, mobile-native, apple-design | [emilkowalski/skills](https://github.com/emilkowalski/skills) |
+| state-machine | [jakubkrehel/skills](https://github.com/jakubkrehel/skills) |
+| show-me (origineel) | [humanlayer/skills](https://github.com/humanlayer/skills) `plugins/show-me` |
