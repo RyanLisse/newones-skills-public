@@ -1,0 +1,16 @@
+HumanLayer commands and agents (Claude Code)
+
+Source:  https://github.com/humanlayer/humanlayer
+Commit:  99abe673498cf8bdcd5f989aebe9406a27185b3b (2026-06-18, last commit
+         before upstream removed .claude/commands and .claude/agents on 2026-10-22)
+License: Apache License, Version 2.0 (full text: LICENSE in this folder)
+Upstream copyright line: "Copyright (c) 2024, humanlayer Authors"
+Upstream NOTICE file: none at this commit.
+
+Every file in commands/ and agents/ is a modified copy. Each file starts with a
+comment that names its exact upstream path at the commit above and lists what
+was changed. Changes are limited to paths and commands that would break outside
+the HumanLayer repo: `humanlayer thoughts sync` made optional, HumanLayer-only
+directories and helper agents replaced with generic wording, the upstream
+developer's personal thoughts/ folder replaced with <user>, two `_generic`
+command variants renamed, and a PR-template fallback in describe_pr.

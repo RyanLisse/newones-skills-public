@@ -1,0 +1,50 @@
+{
+  "skill_name": "improve-claude-md",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Clean up our CLAUDE.md, it's 400 lines. (CLAUDE.md says `npm test`, the repo has pnpm-lock.yaml and a `test:unit` script but no `test` script.)",
+      "expected_output": "A proposed diff that fixes the test command to pnpm test:unit, cuts the file well under its old length, and waits for approval.",
+      "files": [],
+      "expectations": [
+        "Detects pnpm from the lockfile and replaces npm commands",
+        "Replaces `npm test` with a command that exists in package.json scripts, citing the source",
+        "Shows a findings table and a unified diff before writing anything",
+        "Does not modify CLAUDE.md until the user approves"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/improve-claude-md (CLAUDE.md contains a 120-line deployment runbook and a style section that repeats .eslintrc rules.)",
+      "expected_output": "The runbook is proposed as a new docs/agents/deploy.md referenced by one line; the duplicated lint rules are cut.",
+      "files": [],
+      "expectations": [
+        "Proposes moving the runbook to a separate doc with a 'read when' pointer",
+        "Uses a plain path reference rather than an @ import for the moved doc",
+        "Marks lint-enforced style rules as Cut with the config file as the reason",
+        "Shows the new doc's full contents in the proposal"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Is our CLAUDE.md still accurate? (It references `make seed` and src/legacy/, neither of which exists anymore.)",
+      "expected_output": "Both stale references are flagged with evidence and proposed for removal or correction.",
+      "files": [],
+      "expectations": [
+        "Checks the Makefile and reports that the seed target is missing",
+        "Reports that src/legacy/ does not exist",
+        "Does not run commands with side effects to check them"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "/improve-claude-md (the repo also has a CLAUDE.local.md with personal notes)",
+      "expected_output": "Audits CLAUDE.md only; CLAUDE.local.md is left alone because the user did not name it.",
+      "files": [],
+      "expectations": [
+        "Does not propose edits to CLAUDE.local.md",
+        "Mentions that the local file is personal and out of scope unless the user asks"
+      ]
+    }
+  ]
+}
