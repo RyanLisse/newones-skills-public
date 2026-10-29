@@ -102,7 +102,7 @@ Daarna: `/research_codebase`, `/create_plan`, `/implement_plan`, `/validate_plan
 
 ## Herkomst en licenties
 
-Eigen werk van Ryan Lisse, tenzij hieronder anders staat. Elk overgenomen bestand begint met een kopregel met bron, commit en licentie; de volledige licentietekst staat in dezelfde map.
+Eigen werk van Ryan Lisse valt onder de MIT-licentie, zie [`LICENSE`](LICENSE) (© 2026 Ryan Lisse). Overgenomen mappen houden hun eigen licentie, zie de tabel; `humanlayer/` valt onder Apache-2.0. Elk overgenomen bestand begint met een kopregel met bron, commit en licentie; de volledige licentietekst staat in dezelfde map.
 
 | Wat | Bron | Licentie | Licentietekst |
 |-----|------|----------|---------------|
@@ -113,6 +113,7 @@ Eigen werk van Ryan Lisse, tenzij hieronder anders staat. Elk overgenomen bestan
 | `dev-workflow/improve-claude-md` | [humanlayer/skills](https://github.com/humanlayer/skills) @ `653b641`, aangepast | MIT, © 2026 HumanLayer | `LICENSE.humanlayer` |
 | `dev-workflow/visual-plan`, `dev-workflow/diagram` | display-dev/visualize, humanlayer/skills `show-me`, Cocoon-AI/architecture-diagram-generator, aangepast | MIT | `LICENSE.*` in de map |
 | `software-factory/plan`, `implement`, `research`, `company-os/visual-pr` | humanlayer/skills `rpi`, herschreven | MIT, © 2026 HumanLayer | `LICENSE.humanlayer` |
+| Eigen skills van Ryan Lisse (o.a. `shared/*` behalve de mattpocock-afgeleiden, `company-os`, `job-intelligence`, `software-factory` behalve de HumanLayer-afgeleiden) | deze repo | MIT, © 2026 Ryan Lisse | `LICENSE` |
 | `dev-workflow/eli5`, `dev-workflow/handoff` | eigen werk, eerder gepubliceerd in [claude-code-skills-pack](https://github.com/RyanLisse/claude-code-skills-pack) | MIT, © 2026 Ryan Lisse | |
 
 Alle `dev-workflow`-skills komen uit [RyanLisse/claude-code-skills-pack](https://github.com/RyanLisse/claude-code-skills-pack) @ `867fcb1`; daar staan ook `ATTRIBUTION.md` en `NOTICE` met de details per bestand. Niet overgenomen uit dat pack: `java-lts-migration` (Java, niet onze stack), `archify` (heeft de externe Archify-engine nodig) en `rpi` (overlapt met de HumanLayer-commands en `software-factory`). pstack wordt alleen gerefereerd, zie `third-party/`.
